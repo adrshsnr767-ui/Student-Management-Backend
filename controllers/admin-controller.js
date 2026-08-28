@@ -21,7 +21,7 @@ const registerAdmin = async (req, res) => {
             });
         }
         const hashedPassword = await bcrypt.hash(password, 10);
-        const newAdmin = new Admin({ name, email, password: hashedPassword })
+        const newAdmin = new Admin({ name, email, password: hashedPassword , secretkey })
         await newAdmin.save()
 
         const token = jwt.sign(
