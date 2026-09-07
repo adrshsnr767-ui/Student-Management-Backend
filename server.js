@@ -11,11 +11,11 @@ const PORT = process.env.PORT || 3001;
 app.use(express.json());
 app.use(cookieParser());
 app.use(cors({
-  origin: [
-    "http://localhost:5173",
-    "https://student-management-frontend-yg3u-r7w548p5f-aadarsha1.vercel.app/"
-  ],
-  credentials: true
+    origin: [
+        "http://localhost:5173",
+        "https://student-management-frontend-three-mu.vercel.app"
+    ],
+    credentials: true
 }));
 
 // student a
