@@ -15,7 +15,7 @@ app.use(cors({
   credentials: true
 }));
 
-// student 
+// student a
 app.use("/", studentRouter);
 // courses
 app.use("/", courseRouter)

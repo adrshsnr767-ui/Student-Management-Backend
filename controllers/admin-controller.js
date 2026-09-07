@@ -3,7 +3,6 @@ const jwt = require("jsonwebtoken");
 const bcrypt = require("bcrypt");
 const { generateOtp, sendVerificationEmail } = require("../utils/sendOTP");
 
-
 // register new admin 
 const registerAdmin = async (req, res) => {
     try {
@@ -17,11 +16,10 @@ const registerAdmin = async (req, res) => {
         if (secretkey !== process.env.ADMIN_REGISTER_SECRET) {
             return res.status(409).json({
                 message: "Invalid Admin Secret key",
-
             });
         }
         const hashedPassword = await bcrypt.hash(password, 10);
-        const newAdmin = new Admin({ name, email, password: hashedPassword , secretkey })
+        const newAdmin = new Admin({ name, email, password: hashedPassword, secretkey })
         await newAdmin.save()
 
         const token = jwt.sign(
@@ -31,8 +29,8 @@ const registerAdmin = async (req, res) => {
         )
         res.cookie("Token", token, {
             httpOnly: true,
-            secure: true,
-            sameSite: "none",
+            secure: false,
+            sameSite: "lax",
         });
         const adminObj = newAdmin.toObject();
         delete adminObj.password
@@ -47,7 +45,6 @@ const registerAdmin = async (req, res) => {
             error: error.message,
         });
     }
-
 }
 
 // login admin 
@@ -66,7 +63,6 @@ const loginAdmin = async (req, res) => {
                 message: "Invalid password",
             });
         }
-        // otp 
         const otp = generateOtp()
         admin.otp = otp
         admin.otpExpiry = Date.now() + 5 * 60 * 1000; // 5 min
@@ -77,9 +73,7 @@ const loginAdmin = async (req, res) => {
             return res.status(500).json({ message: "failed to send OTP email" });
         }
 
-
         res.status(200).json({ message: "OTP sent to your email" });
-
 
     } catch (error) {
         res.status(500).json({
@@ -87,8 +81,8 @@ const loginAdmin = async (req, res) => {
             error: error.message,
         });
     }
-
 }
+
 // verify otp 
 const verifyOtp = async (req, res) => {
     try {
@@ -104,7 +98,6 @@ const verifyOtp = async (req, res) => {
                 message: "Invalid or expired OTP",
             });
         }
-        // clear otp and expiry
         admin.otp = null;
         admin.otpExpiry = null;
         await admin.save();
@@ -112,12 +105,12 @@ const verifyOtp = async (req, res) => {
         const token = jwt.sign(
             { id: admin._id, role: "admin" },
             process.env.JWT_SECRET_KEY,
-            { expiresIn: "1h" },
+            { expiresIn: "1d" },
         )
         res.cookie("Token", token, {
             httpOnly: true,
-            secure: true,
-            sameSite: "none",
+            secure: false,
+            sameSite: "lax",
         });
         const adminObj = admin.toObject();
         delete adminObj.password
@@ -139,8 +132,8 @@ const logoutAdmin = async (req, res) => {
     try {
         res.clearCookie("Token", {
             httpOnly: true,
-            secure: true,
-            sameSite: "none",
+            secure: false,
+            sameSite: "lax",
         });
         res.status(200).json({ message: "Logout successful" });
     } catch (error) {
@@ -151,5 +144,25 @@ const logoutAdmin = async (req, res) => {
     }
 }
 
-module.exports = { registerAdmin, loginAdmin, verifyOtp, logoutAdmin };
+// remember admin
+const me = async (req, res) => {
+    try {
+        const user = await Admin.findById(req.user.id).select("-password");
+        if (!user) {
+            return res.status(404).json({
+                message: "user not found",
+                data: "user",
+            });
+        }
+        res.status(200).json({
+            data: user,
+        });
+    } catch (error) {
+        res.status(500).json({
+            message: "failed to fetch user",
+            error: error.message,
+        });
+    }
+};
 
+module.exports = { registerAdmin, loginAdmin, verifyOtp, logoutAdmin, me };

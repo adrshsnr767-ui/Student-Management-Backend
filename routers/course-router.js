@@ -8,4 +8,8 @@ courseRouter.route("/course").get(verifyToken, courseController.getAllCourses);
 
 courseRouter.route("/course/add").post(verifyToken, courseController.addCourse);
 
+courseRouter.route("/course/delete/:id").delete(verifyToken, courseController.deleteCourse);
+
+courseRouter.route("/course/search/:search").get(verifyToken, courseController.searchCourses);
+
 module.exports = courseRouter;
