@@ -29,8 +29,8 @@ const registerAdmin = async (req, res) => {
         )
         res.cookie("Token", token, {
             httpOnly: true,
-            secure: false,
-            sameSite: "lax",
+            secure: true,
+            sameSite: "none",
         });
         const adminObj = newAdmin.toObject();
         delete adminObj.password
@@ -109,8 +109,8 @@ const verifyOtp = async (req, res) => {
         )
         res.cookie("Token", token, {
             httpOnly: true,
-            secure: false,
-            sameSite: "lax",
+            secure: true,
+            sameSite: "none",
         });
         const adminObj = admin.toObject();
         delete adminObj.password
